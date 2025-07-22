@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Add/Edit Product</title>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header">
+      <h4 th:text="'Add Product'"></h4>
+    </div>
+    <div class="card-body">
+      <form th:action="@{'/admin/products'}" th:object="${product}" method="post">
+        <!-- 상품 기본 정보 -->
+        <div class="mb-3">
+          <label for="name">Name</label>
+          <input type="text" th:field="*{name}" class="form-control" id="name" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="price">Price</label>
+          <input type="number" th:field="*{price}" class="form-control" id="price" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="imageUrl">Image URL</label>
+          <input type="text" th:field="*{imageUrl}" class="form-control" id="imageUrl" required>
+        </div>
+
+        <!-- 옵션 목록 -->
+        <div id="options-container">
+          <div th:each="option, stat : *{options}" class="option-item border rounded p-3 mb-3">
+            <div class="mb-2">
+              <label>Option Name</label>
+              <input type="text" th:field="*{options[__${stat.index}__].name}" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label>Quantity</label>
+              <input type="number" th:field="*{options[__${stat.index}__].quantity}" class="form-control" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- 옵션 추가 버튼 -->
+        <button type="button" class="btn btn-outline-primary mt-3" onclick="addOption()">+ 옵션 추가</button>
+
+        <!-- 옵션 템플릿 -->
+        <template id="option-template">
+          <div class="option-item border rounded p-3 mb-3">
+            <div class="mb-2">
+              <label>Option Name</label>
+              <input type="text" class="form-control" name="options[__index__].name" required />
+            </div>
+            <div class="mb-2">
+              <label>Quantity</label>
+              <input type="number" class="form-control" name="options[__index__].quantity" required />
+            </div>
+            <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeOption(this)">삭제</button>
+          </div>
+        </template>
+
+        <!-- 제출 버튼 -->
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" th:text="'Add'"></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  let optionIndex = [[${#lists.size(product.options)}]] || 0;
+
+  function addOption() {
+    const container = document.getElementById("options-container");
+    const template = document.getElementById("option-template").innerHTML;
+    const html = template.replace(/__index__/g, optionIndex);
+    container.insertAdjacentHTML("beforeend", html);
+    optionIndex++;
+  }
+
+  function reIndexOptions() {
+    const options = document.querySelectorAll("#options-container .option-item");
+    options.forEach((optionDiv, index) => {
+      optionDiv.querySelectorAll("input").forEach(input => {
+        if (input.name.includes("name")) {
+          input.name = `options[${index}].name`;
+        } else if (input.name.includes("quantity")) {
+          input.name = `options[${index}].quantity`;
+        }
+      });
+    });
+    optionIndex = options.length;
+  }
+
+  function removeOption(btn) {
+    btn.closest(".option-item").remove();
+    reIndexOptions();
+  }
+</script>
+</body>
+</html>

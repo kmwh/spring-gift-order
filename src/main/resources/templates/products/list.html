@@ -1,0 +1,94 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <title>Manage Product</title>
+  <style>
+    .table td, .table th {
+        vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4>Product List</h4>
+      <a href="/admin/products/new" class="btn btn-success">+ Add Product</a>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered table-hover">
+        <colgroup>
+          <col style="width: 5%;">   <!-- ID -->
+          <col style="width: 10%;">   <!-- IMG -->
+          <col style="width: 35%;">   <!-- NAME -->
+          <col style="width: 35%;">   <!-- PRICE -->
+          <col style="width: 15%;">   <!-- OPTION -->
+        </colgroup>
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>IMG</th>
+            <th>NAME</th>
+            <th>PRICE</th>
+            <th>OPTION</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products.content}">
+          <td th:text="${product.id}" class="text-center"></td>
+          <td class="text-center">
+            <img th:src="${product.imageUrl}" alt="Product Image" style="max-width: 100px; max-height: 100px;" />
+          </td>
+          <td th:text="${product.name}"></td>
+          <td th:text="|${product.price} ₩|"></td>
+          <td class="text-center align-middle">
+            <div class="d-inline-flex gap-2 align-items-center">
+              <!-- 수정 버튼 -->
+              <a th:href="@{'/admin/products/' + ${product.id} + '/edit'}"
+                 class="btn btn-sm btn-warning d-flex align-items-center justify-content-center"
+                 style="color: black; min-width: 70px; height: 40px;">
+                Edit
+              </a>
+              <!-- 삭제 버튼 -->
+              <form th:action="@{'/admin/products/' + ${product.id}}" method="post" class="d-inline">
+                <input type="hidden" name="_method" value="delete"/>
+                <button type="submit"
+                        class="btn btn-sm btn-danger d-flex align-items-center justify-content-center"
+                        onclick="return confirm('Are you sure you want to delete it?');"
+                        style="color: white; min-width: 70px; height: 40px;">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(products)}">
+          <td colspan="5" class="text-center">No products</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+        <a class="page-link" th:href="@{/admin/products(page=${products.number - 1}, size=${products.size})}">Prev</a>
+      </li>
+      <li class="page-item"
+          th:each="pageNum : ${#numbers.sequence(0, products.totalPages - 1)}"
+          th:classappend="${pageNum == products.number} ? 'active'">
+        <a class="page-link"
+           th:href="@{/admin/products(page=${pageNum}, size=${products.size})}"
+           th:text="${pageNum + 1}"></a>
+      </li>
+      <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+        <a class="page-link" th:href="@{/admin/products(page=${products.number + 1}, size=${products.size})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+</body>
+</html>
