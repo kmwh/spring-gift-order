@@ -9,8 +9,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import java.util.Map;
-
 @Service
 public class KakaoServiceImpl implements KakaoService {
     private final RestClient restClient;
