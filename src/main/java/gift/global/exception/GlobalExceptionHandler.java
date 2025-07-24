@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body("같은 이름의 옵션이 이미 존재합니다.");
+            .body(ex.getMessage());
     }
 
     @ExceptionHandler(JwtException.class)

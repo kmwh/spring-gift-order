@@ -1,5 +1,6 @@
 package gift.member.service;
 
+import gift.kakao.dto.KakaoUserResponseDto;
 import gift.member.dto.MemberLoginRequestDto;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.dto.MemberRegisterRequestDto;
@@ -13,4 +14,5 @@ public interface MemberService {
     MemberResponseDto findById(Long id);
     void update(Long id, MemberRegisterRequestDto requestDto);
     void delete(Long id);
+    MemberLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto);
 }

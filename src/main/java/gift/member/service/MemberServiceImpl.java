@@ -7,6 +7,7 @@ import gift.global.exception.MemberEmailAlreadyExistsException;
 import gift.global.exception.MemberEmailNotFoundException;
 import gift.global.exception.MemberNotFoundException;
 import gift.global.security.JwtProvider;
+import gift.kakao.dto.KakaoUserResponseDto;
 import gift.member.dto.MemberLoginRequestDto;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.dto.MemberRegisterRequestDto;
@@ -104,5 +105,31 @@ public class MemberServiceImpl implements MemberService {
         }
 
         memberRepository.deleteById(id);
+    }
+
+    @Transactional
+    public MemberLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto) {
+        Long socialId = userResponseDto.id();
+
+        Optional<Member> optionalMember =
+            memberRepository.findByProviderAndSocialId("kakao", socialId);
+
+        Member member;
+        if (optionalMember.isPresent()) {
+            member = optionalMember.get();
+        } else {
+            // 새 사용자 등록
+            member = new Member(
+                null,
+                null,
+                null,
+                null, // password는 null
+                "kakao",
+                socialId
+            );
+            memberRepository.save(member);
+        }
+
+        return MemberLoginResponseDto.from(jwtProvider.createToken(member));
     }
 }

@@ -3,6 +3,7 @@ package gift.member.entity;
 import gift.member.vo.Email;
 import gift.member.vo.Name;
 import gift.member.vo.Password;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +27,12 @@ public class Member {
     @Embedded
     private Password password;
 
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "social_id")
+    private Long socialId;
+
     protected Member() {}
 
     public Member(Long id) {
@@ -37,6 +44,15 @@ public class Member {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public Member(Long id, Name name, Email email, Password password, String provider, Long socialId) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.provider = provider;
+        this.socialId = socialId;
     }
 
     public Long getId() {
