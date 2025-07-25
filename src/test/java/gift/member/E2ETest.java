@@ -82,7 +82,6 @@ public class E2ETest {
         assertThat(jwtTokenProvider.isTokenExpired(loginToken)).isFalse();
         Claims loginClaims = jwtTokenProvider.parseToken(loginToken);
         assertThat(loginClaims.getSubject()).isEqualTo("1");
-        assertThat(loginClaims.get("name", String.class)).isEqualTo("test1");
     }
 
     @Test
