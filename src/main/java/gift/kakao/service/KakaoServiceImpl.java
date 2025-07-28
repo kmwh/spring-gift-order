@@ -2,12 +2,14 @@ package gift.kakao.service;
 
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
+import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class KakaoServiceImpl implements KakaoService {
@@ -19,14 +21,8 @@ public class KakaoServiceImpl implements KakaoService {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    @Value("${kakao.token-uri}")
-    private String tokenUri;
-
-    @Value("${kakao.user-info-uri}")
-    private String userInfoUri;
-
-    public KakaoServiceImpl() {
-        this.restClient = RestClient.create();
+    public KakaoServiceImpl(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @Override
@@ -38,22 +34,34 @@ public class KakaoServiceImpl implements KakaoService {
         params.add("code", code);
 
         KakaoTokenResponseDto tokenResponse = restClient.post()
-            .uri(tokenUri)
+            .uri("/oauth/token")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .body(params)
             .retrieve()
             .body(KakaoTokenResponseDto.class);
 
+        if (tokenResponse == null) {
+            throw new NullPointerException("토큰이 반환되지 않았습니다.");
+        }
         return tokenResponse.accessToken();
     }
-
 
     @Override
     public KakaoUserResponseDto getUserInfo(String accessToken) {
         return restClient.get()
-            .uri(userInfoUri)
+            .uri("/v2/user/me")
             .header("Authorization", "Bearer " + accessToken)
             .retrieve()
             .body(KakaoUserResponseDto.class);
+    }
+
+    @Override
+    public URI getKakaoAuthUri() {
+        return UriComponentsBuilder.fromUriString("https://kauth.kakao.com")
+            .path("/oauth/authorize")
+            .queryParam("response_type", "code")
+            .queryParam("client_id", clientId)
+            .queryParam("redirect_uri", redirectUri)
+            .build().toUri();
     }
 }

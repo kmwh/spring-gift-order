@@ -70,4 +70,15 @@ public class Member {
     public Password getPassword() {
         return password;
     }
+
+    public static Member createFromKakao(Long socialId) {
+        return new Member(
+            null,
+            null,
+            null,
+            null,
+            "kakao",
+            socialId
+        );
+    }
 }

@@ -111,24 +111,12 @@ public class MemberServiceImpl implements MemberService {
     public MemberLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto) {
         Long socialId = userResponseDto.id();
 
-        Optional<Member> optionalMember =
-            memberRepository.findByProviderAndSocialId("kakao", socialId);
-
-        Member member;
-        if (optionalMember.isPresent()) {
-            member = optionalMember.get();
-        } else {
-            // 새 사용자 등록
-            member = new Member(
-                null,
-                null,
-                null,
-                null, // password는 null
-                "kakao",
-                socialId
-            );
-            memberRepository.save(member);
-        }
+        Member member = memberRepository
+            .findByProviderAndSocialId("kakao", socialId)
+            .orElseGet(() -> {
+                Member newMember = Member.createFromKakao(socialId);
+                return memberRepository.save(newMember);
+            });
 
         return MemberLoginResponseDto.from(jwtProvider.createToken(member));
     }

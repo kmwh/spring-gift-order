@@ -17,12 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth/kakao")
 public class KakaoController {
-    @Value("${kakao.client-id}")
-    private String clientId;
-
-    @Value("${kakao.redirect-uri}")
-    private String redirectUri;
-
     private final KakaoService kakaoService;
 
     private final MemberService memberService;
@@ -34,12 +28,8 @@ public class KakaoController {
 
     @GetMapping("/login")
     public ResponseEntity<Void> authRedirectToKakao() {
-        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize" +
-            "?response_type=code" +
-            "&client_id=" + clientId +
-            "&redirect_uri=" + redirectUri;
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(kakaoAuthUrl));
+        headers.setLocation(kakaoService.getKakaoAuthUri());
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
