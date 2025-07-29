@@ -1,6 +1,6 @@
 package gift.kakao.dto;
 
-public record KakaoOrderRequestDto(
+public record OrderRequestDto(
     Long optionId,
     Integer quantity,
     String message

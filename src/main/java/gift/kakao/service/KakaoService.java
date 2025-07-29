@@ -1,7 +1,7 @@
 package gift.kakao.service;
 
-import gift.kakao.dto.KakaoOrderRequestDto;
-import gift.kakao.dto.KakaoOrderResponseDto;
+import gift.kakao.dto.OrderRequestDto;
+import gift.kakao.dto.OrderResponseDto;
 import gift.kakao.dto.KakaoTokenRequestDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
@@ -13,5 +13,5 @@ public interface KakaoService {
     KakaoUserResponseDto getUserInfo(String accessToken);
     URI getKakaoAuthUri();
     void saveToken(KakaoTokenRequestDto requestDto);
-    KakaoOrderResponseDto order(HttpServletRequest request, KakaoOrderRequestDto requestDto);
+    OrderResponseDto order(HttpServletRequest request, OrderRequestDto requestDto);
 }

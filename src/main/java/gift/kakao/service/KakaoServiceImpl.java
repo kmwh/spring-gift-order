@@ -3,8 +3,8 @@ package gift.kakao.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.global.exception.OptionNotFoundException;
-import gift.kakao.dto.KakaoOrderRequestDto;
-import gift.kakao.dto.KakaoOrderResponseDto;
+import gift.kakao.dto.OrderRequestDto;
+import gift.kakao.dto.OrderResponseDto;
 import gift.kakao.dto.KakaoTokenRequestDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -41,8 +40,7 @@ public class KakaoServiceImpl implements KakaoService {
 
     private final OptionService optionService;
 
-    @Autowired
-    private RestClient restClient;
+    private final RestClient restClient;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -54,12 +52,14 @@ public class KakaoServiceImpl implements KakaoService {
         KakaoTokenRepository kakaoTokenRepository,
         OptionRepository optionRepository,
         OrderRepository orderRepository,
-        OptionService optionService
+        OptionService optionService,
+        RestClient restClient
     ) {
         this.kakaoTokenRepository = kakaoTokenRepository;
         this.orderRepository = orderRepository;
         this.optionRepository = optionRepository;
         this.optionService = optionService;
+        this.restClient = restClient;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class KakaoServiceImpl implements KakaoService {
     }
 
     @Override
-    public KakaoOrderResponseDto order(HttpServletRequest request, KakaoOrderRequestDto requestDto) {
+    public OrderResponseDto order(HttpServletRequest request, OrderRequestDto requestDto) {
         Optional<Option> optionOptional = optionRepository.findById(requestDto.optionId());
         Option option = optionOptional.orElseThrow(OptionNotFoundException::new);
 
@@ -122,7 +122,7 @@ public class KakaoServiceImpl implements KakaoService {
 
         optionService.subtract(requestDto.optionId(), requestDto.quantity());
 
-        KakaoOrderResponseDto responseDto = KakaoOrderResponseDto.from(orderResponse);
+        OrderResponseDto responseDto = OrderResponseDto.from(orderResponse);
 
         // 나에게 메시지 전송
         String kakaoAccessToken = (String) request.getAttribute("kakaoAccessToken");
@@ -140,15 +140,14 @@ public class KakaoServiceImpl implements KakaoService {
         return responseDto;
     }
 
-    public MultiValueMap<String, String> toKakaoTemplateFormData(KakaoOrderResponseDto dto) {
-        // 예시로, 주문 메시지 제목, 설명, 이미지, 링크를 dto 데이터 기반으로 만듭니다.
+    public MultiValueMap<String, String> toKakaoTemplateFormData(OrderResponseDto dto) {
+        // 주문 메시지 제목, 설명, 이미지, 링크를 dto 데이터 기반으로 생성 (현재는 orderId)
         Link link = new Link(
             "",
             "",
             "",
             ""
         );
-
         Content content = new Content(
             "주문번호: " + dto.id(),
             link

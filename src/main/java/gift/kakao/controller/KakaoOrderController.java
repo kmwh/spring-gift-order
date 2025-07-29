@@ -1,7 +1,7 @@
 package gift.kakao.controller;
 
-import gift.kakao.dto.KakaoOrderRequestDto;
-import gift.kakao.dto.KakaoOrderResponseDto;
+import gift.kakao.dto.OrderRequestDto;
+import gift.kakao.dto.OrderResponseDto;
 import gift.kakao.service.KakaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -21,11 +21,11 @@ public class KakaoOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<KakaoOrderResponseDto> order(
+    public ResponseEntity<OrderResponseDto> order(
         HttpServletRequest request,
-        @RequestBody KakaoOrderRequestDto requestDto
+        @RequestBody OrderRequestDto requestDto
     ) {
-        KakaoOrderResponseDto responseDto = kakaoService.order(request, requestDto);
+        OrderResponseDto responseDto = kakaoService.order(request, requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(responseDto);

@@ -3,15 +3,15 @@ package gift.kakao.dto;
 import gift.kakao.entity.Order;
 import java.time.LocalDateTime;
 
-public record KakaoOrderResponseDto(
+public record OrderResponseDto(
     Long id,
     Long optionId,
     Integer quantity,
     LocalDateTime orderDateTime,
     String message
 ) {
-    public static KakaoOrderResponseDto from(Order order) {
-        return new KakaoOrderResponseDto(
+    public static OrderResponseDto from(Order order) {
+        return new OrderResponseDto(
             order.getId(),
             order.getOption()
                 .getId(),
