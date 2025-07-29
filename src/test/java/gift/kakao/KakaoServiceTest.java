@@ -2,13 +2,11 @@ package gift.kakao;
 
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.service.KakaoServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
@@ -55,7 +53,7 @@ class KakaoServiceTest {
         when(responseSpec.body(KakaoTokenResponseDto.class)).thenReturn(mockResponse);
 
         // then
-        String result = kakaoService.requestAccessToken(code);
-        assertEquals("access-token-value", result);
+        KakaoTokenResponseDto result = kakaoService.requestAccessToken(code);
+        assertEquals("access-token-value", result.accessToken());
     }
 }

@@ -1,11 +1,11 @@
 package gift.kakao.controller;
 
+import gift.kakao.dto.KakaoLoginResponseDto;
+import gift.kakao.dto.KakaoTokenRequestDto;
+import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
 import gift.kakao.service.KakaoService;
-import gift.member.dto.MemberLoginResponseDto;
 import gift.member.service.MemberService;
-import java.net.URI;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth/kakao")
-public class KakaoController {
+public class KakaoAuthController {
     private final KakaoService kakaoService;
 
     private final MemberService memberService;
 
-    public KakaoController(KakaoService kakaoService, MemberService memberService) {
+    public KakaoAuthController(KakaoService kakaoService, MemberService memberService) {
         this.kakaoService = kakaoService;
         this.memberService = memberService;
     }
@@ -35,10 +35,20 @@ public class KakaoController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<MemberLoginResponseDto> authCallback(@RequestParam("code") String code) {
-        String accessToken = kakaoService.requestAccessToken(code);
-        KakaoUserResponseDto userResponseDto = kakaoService.getUserInfo(accessToken);
+    public ResponseEntity<KakaoLoginResponseDto> authCallback(@RequestParam("code") String code) {
+        KakaoTokenResponseDto accessToken = kakaoService.requestAccessToken(code);
+        KakaoUserResponseDto userResponseDto = kakaoService.getUserInfo(accessToken.accessToken());
 
-        return ResponseEntity.ok(memberService.loginWithKakao(userResponseDto));
+        KakaoLoginResponseDto loginResponseDto = memberService.loginWithKakao(userResponseDto);
+
+        kakaoService.saveToken(KakaoTokenRequestDto.from(
+            accessToken.accessToken(),
+            accessToken.refreshToken(),
+            accessToken.expiresIn(),
+            accessToken.refreshTokenExpiresIn(),
+            loginResponseDto.member()
+        ));
+
+        return ResponseEntity.ok(loginResponseDto);
     }
 }

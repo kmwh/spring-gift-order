@@ -1,5 +1,6 @@
 package gift.kakao.entity;
 
+import gift.kakao.dto.KakaoTokenRequestDto;
 import gift.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,11 +35,37 @@ public class KakaoToken {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    protected KakaoToken() {}
+
+    protected KakaoToken(
+        String accessToken,
+        String refreshToken,
+        int accessTokenExpiresIn,
+        int refreshTokenExpiresIn,
+        Member member
+    ) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.accessTokenExpiresIn = LocalDateTime.now().plusSeconds(accessTokenExpiresIn);
+        this.refreshTokenExpiresIn = LocalDateTime.now().plusSeconds(refreshTokenExpiresIn);
+        this.member = member;
+    }
+
     public boolean isAccessTokenExpired() {
         return LocalDateTime.now().isAfter(this.accessTokenExpiresIn);
     }
 
     public boolean isRefreshTokenExpired() {
         return LocalDateTime.now().isAfter(this.refreshTokenExpiresIn);
+    }
+
+    public static KakaoToken from(KakaoTokenRequestDto requestDto) {
+        return new KakaoToken(
+            requestDto.accessToken(),
+            requestDto.refreshToken(),
+            requestDto.expiresIn(),
+            requestDto.refreshTokenExpiresIn(),
+            requestDto.member()
+        );
     }
 }

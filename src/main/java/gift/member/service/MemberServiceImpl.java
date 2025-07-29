@@ -7,6 +7,7 @@ import gift.global.exception.MemberEmailAlreadyExistsException;
 import gift.global.exception.MemberEmailNotFoundException;
 import gift.global.exception.MemberNotFoundException;
 import gift.global.security.JwtProvider;
+import gift.kakao.dto.KakaoLoginResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
 import gift.member.dto.MemberLoginRequestDto;
 import gift.member.dto.MemberLoginResponseDto;
@@ -53,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = validMember(requestDto.email(), requestDto.password());
         String token = jwtProvider.createToken(member);
 
-        return new MemberLoginResponseDto(token);
+        return MemberLoginResponseDto.from(token);
     }
 
     private Member validMember(String email, String password) {
@@ -61,6 +62,7 @@ public class MemberServiceImpl implements MemberService {
 
         check(member != null, new MemberEmailNotFoundException());
         check(member.getPassword().matches(password), new InvalidPasswordException());
+
         return member;
     }
 
@@ -108,7 +110,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Transactional
-    public MemberLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto) {
+    public KakaoLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto) {
         Long socialId = userResponseDto.id();
 
         Member member = memberRepository
@@ -118,6 +120,6 @@ public class MemberServiceImpl implements MemberService {
                 return memberRepository.save(newMember);
             });
 
-        return MemberLoginResponseDto.from(jwtProvider.createToken(member));
+        return KakaoLoginResponseDto.from(jwtProvider.createToken(member), member);
     }
 }

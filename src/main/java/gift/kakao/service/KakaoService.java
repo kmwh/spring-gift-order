@@ -1,10 +1,13 @@
 package gift.kakao.service;
 
+import gift.kakao.dto.KakaoTokenRequestDto;
+import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
 import java.net.URI;
 
 public interface KakaoService {
-    String requestAccessToken(String code);
+    KakaoTokenResponseDto requestAccessToken(String code);
     KakaoUserResponseDto getUserInfo(String accessToken);
     URI getKakaoAuthUri();
+    void saveToken(KakaoTokenRequestDto requestDto);
 }
