@@ -37,7 +37,7 @@ public class KakaoToken {
 
     protected KakaoToken() {}
 
-    protected KakaoToken(
+    public KakaoToken(
         String accessToken,
         String refreshToken,
         int accessTokenExpiresIn,
@@ -67,5 +67,13 @@ public class KakaoToken {
             requestDto.refreshTokenExpiresIn(),
             requestDto.member()
         );
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 }

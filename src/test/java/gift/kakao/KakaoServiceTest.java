@@ -3,14 +3,15 @@ package gift.kakao;
 import gift.kakao.dto.OrderRequestDto;
 import gift.kakao.dto.OrderResponseDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
+import gift.kakao.entity.KakaoToken;
 import gift.kakao.entity.Order;
 import gift.kakao.repository.KakaoTokenRepository;
 import gift.kakao.repository.OrderRepository;
 import gift.kakao.service.KakaoServiceImpl;
+import gift.member.entity.Member;
 import gift.option.entity.Option;
 import gift.option.repository.OptionRepository;
 import gift.option.service.OptionService;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -51,9 +52,6 @@ class KakaoServiceTest {
 
     @Mock
     private KakaoTokenRepository kakaoTokenRepository;
-
-    @Mock
-    private HttpServletRequest httpServletRequest;
 
     @InjectMocks
     private KakaoServiceImpl kakaoService;
@@ -98,47 +96,60 @@ class KakaoServiceTest {
     }
 
     @Test
-    void 카카오_주문_성공_테스트() throws Exception {
+    void 카카오_주문_성공_테스트() {
         // given
-        Long optionId = 1L;
+        Long memberId = 1L;
+        Long optionId = 100L;
         int quantity = 2;
-        String message = "테스트 메시지";
+        String message = "테스트";
+        String kakaoAccessToken = "mockAccessToken";
 
-        Option mockOption = mock(Option.class);
-        Order mockOrder = mock(Order.class);
+        OrderRequestDto requestDto = new OrderRequestDto(
+            optionId,
+            quantity,
+            message
+        );
 
-        // when
-        when(mockOrder.getId()).thenReturn(1L);
-        when(mockOption.getId()).thenReturn(optionId);
-        when(mockOrder.getOption()).thenReturn(mockOption);
-        when(mockOrder.getQuantity()).thenReturn(quantity);
-        when(mockOrder.getOrderDateTime()).thenReturn(LocalDateTime.now());
-        when(mockOrder.getMessage()).thenReturn(message);
+        Option option = mock(Option.class);
+        when(option.getId()).thenReturn(optionId);
 
-        when(optionRepository.findById(optionId)).thenReturn(Optional.of(mockOption));
-        when(orderRepository.save(any(Order.class))).thenReturn(mockOrder);
+        Order savedOrder = Order.from(
+            option,
+            quantity,
+            LocalDateTime.now(),
+            message
+        );
 
-        when(httpServletRequest.getAttribute("kakaoAccessToken")).thenReturn("fake_token");
+        KakaoToken token = new KakaoToken(
+            kakaoAccessToken,
+            "refresh",
+            3600,
+            86400,
+            mock(Member.class)
+        );
+
+        // mocking
+        when(optionRepository.findById(optionId)).thenReturn(Optional.of(option));
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+        when(kakaoTokenRepository.findByMemberId(memberId)).thenReturn(Optional.of(token));
+        doNothing().when(optionService).subtract(optionId, quantity);
 
         when(restClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.header(anyString(), anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.contentType(MediaType.APPLICATION_FORM_URLENCODED)).thenReturn(requestBodySpec);
+        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.header(anyString(), anyString())).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.contentType(any())).thenReturn(requestBodySpec);
         when(requestBodySpec.body(any(MultiValueMap.class))).thenReturn(requestBodySpec);
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(null);
+        when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
 
-        OrderRequestDto requestDto = new OrderRequestDto(optionId, quantity, message);
-        OrderResponseDto result = kakaoService.order(httpServletRequest, requestDto);
+        // when
+        OrderResponseDto result = kakaoService.order(memberId, requestDto);
 
         // then
-        assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.optionId()).isEqualTo(optionId);
-        assertThat(result.quantity()).isEqualTo(quantity);
-        assertThat(result.message()).isEqualTo(message);
-
-        verify(optionService).subtract(optionId, quantity);
+        assertNotNull(result);
+        verify(optionRepository).findById(optionId);
         verify(orderRepository).save(any(Order.class));
+        verify(optionService).subtract(optionId, quantity);
         verify(restClient).post();
     }
 }

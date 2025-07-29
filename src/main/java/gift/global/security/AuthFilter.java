@@ -39,29 +39,15 @@ public class AuthFilter extends OncePerRequestFilter {
         }
         String token = header.substring(7);
 
-        String path = request.getRequestURI();
-        if (path.startsWith("/api/wishes")) {
-            try {
-                Long memberId = jwtProvider.getMemberId(token);
-                // memberId를 request에 저장
-                request.setAttribute("memberId", memberId);
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter()
-                    .write("유효하지 않은 JWT 입니다.");
-                return;
-            }
-        }
-
-        if (path.startsWith("/api/orders")) {
-            try {
-                request.setAttribute("kakaoAccessToken", token);
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter()
-                    .write("유효하지 않은 액세스 토큰입니다.");
-                return;
-            }
+        try {
+            Long memberId = jwtProvider.getMemberId(token);
+            // memberId를 request에 저장
+            request.setAttribute("memberId", memberId);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter()
+                .write("유효하지 않은 JWT 입니다.");
+            return;
         }
 
         filterChain.doFilter(request, response);

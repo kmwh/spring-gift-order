@@ -25,7 +25,12 @@ public class KakaoOrderController {
         HttpServletRequest request,
         @RequestBody OrderRequestDto requestDto
     ) {
-        OrderResponseDto responseDto = kakaoService.order(request, requestDto);
+        Long memberId = (Long) request.getAttribute("memberId");
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAA");
+        System.out.println(memberId);
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAA");
+
+        OrderResponseDto responseDto = kakaoService.order(memberId, requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(responseDto);
