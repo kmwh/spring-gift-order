@@ -69,7 +69,7 @@ public class OptionServiceImpl implements OptionService{
     @Transactional
     @Override
     public void delete(Long productId, Long optionId) {
-        if (!optionRepository.existsByIdAndProductId(optionId, productId)) {
+        if (!optionRepository.existsById(optionId)) {
             throw new OptionNotFoundException();
         }
 
@@ -82,8 +82,8 @@ public class OptionServiceImpl implements OptionService{
 
     @Transactional
     @Override
-    public void subtract(Long productId, Long optionId, Integer num) {
-        Optional<Option> optionOptional = optionRepository.findByIdAndProductId(optionId, productId);
+    public void subtract(Long optionId, Integer num) {
+        Optional<Option> optionOptional = optionRepository.findById(optionId);
         Option option = optionOptional.orElseThrow(OptionNotFoundException::new);
 
         option.updateQuantity(option.getQuantity() - num);

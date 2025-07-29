@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class AuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
 
-    public JwtAuthFilter(JwtProvider jwtProvider) {
+    public AuthFilter(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return !path.startsWith("/api/wishes"); // "/api/wishes"로 시작하지 않으면 필터 적용하지 않음
+        return !path.startsWith("/api/wishes") && !path.startsWith("/api/orders");
     }
 
     @Override
@@ -37,17 +37,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .write("Missing or invalid Authorization header");
             return;
         }
-
         String token = header.substring(7);
-        try {
-            Long memberId = jwtProvider.getMemberId(token);
-            // memberId를 request에 저장
-            request.setAttribute("memberId", memberId);
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter()
-                .write("Invalid token");
-            return;
+
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/wishes")) {
+            try {
+                Long memberId = jwtProvider.getMemberId(token);
+                // memberId를 request에 저장
+                request.setAttribute("memberId", memberId);
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter()
+                    .write("유효하지 않은 JWT 입니다.");
+                return;
+            }
+        }
+
+        if (path.startsWith("/api/orders")) {
+            try {
+                request.setAttribute("kakaoAccessToken", token);
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter()
+                    .write("유효하지 않은 액세스 토큰입니다.");
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -15,7 +17,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class KakaoServiceTest {
-
     @Mock
     private RestClient restClient;
 
@@ -46,7 +47,7 @@ class KakaoServiceTest {
 
         // when
         when(restClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/oauth/token")).thenReturn(requestBodySpec);
+        when(requestBodyUriSpec.uri("https://kauth.kakao.com/oauth/token")).thenReturn(requestBodySpec);
         when(requestBodySpec.contentType(MediaType.APPLICATION_FORM_URLENCODED)).thenReturn(requestBodySpec);
         when(requestBodySpec.body(any(MultiValueMap.class))).thenReturn(requestBodySpec);
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
