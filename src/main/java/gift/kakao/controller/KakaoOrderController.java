@@ -26,9 +26,6 @@ public class KakaoOrderController {
         @RequestBody OrderRequestDto requestDto
     ) {
         Long memberId = (Long) request.getAttribute("memberId");
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAA");
-        System.out.println(memberId);
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAA");
 
         OrderResponseDto responseDto = kakaoService.order(memberId, requestDto);
 
