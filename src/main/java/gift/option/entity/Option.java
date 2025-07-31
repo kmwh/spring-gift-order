@@ -67,4 +67,8 @@ public class Option {
     public void setProduct(Product product) {
         this.product = product;
     }
+
+    public void subtract(int quantity) {
+        updateQuantity(getQuantity() - quantity);
+    }
 }

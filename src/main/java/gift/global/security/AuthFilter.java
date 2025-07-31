@@ -5,22 +5,25 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class AuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
 
-    public JwtAuthFilter(JwtProvider jwtProvider) {
+    public AuthFilter(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        List<String> excludedPrefixes = List.of("/api/wishes", "/api/orders");
+
         String path = request.getRequestURI();
-        return !path.startsWith("/api/wishes"); // "/api/wishes"로 시작하지 않으면 필터 적용하지 않음
+        return excludedPrefixes.stream().noneMatch(path::startsWith);
     }
 
     @Override
@@ -37,8 +40,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .write("Missing or invalid Authorization header");
             return;
         }
-
         String token = header.substring(7);
+
         try {
             Long memberId = jwtProvider.getMemberId(token);
             // memberId를 request에 저장
@@ -46,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter()
-                .write("Invalid token");
+                .write("유효하지 않은 JWT 입니다.");
             return;
         }
 

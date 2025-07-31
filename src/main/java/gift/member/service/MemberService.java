@@ -14,5 +14,5 @@ public interface MemberService {
     MemberResponseDto findById(Long id);
     void update(Long id, MemberRegisterRequestDto requestDto);
     void delete(Long id);
-    MemberLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto);
+    MemberLoginResponseDto loginWithKakao(String code);
 }

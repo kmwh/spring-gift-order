@@ -1,11 +1,10 @@
 package gift.kakao.controller;
 
+import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
-import gift.kakao.service.KakaoService;
+import gift.kakao.service.KakaoAuthService;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.service.MemberService;
-import java.net.URI;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,39 +15,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth/kakao")
-public class KakaoController {
-    @Value("${kakao.client-id}")
-    private String clientId;
-
-    @Value("${kakao.redirect-uri}")
-    private String redirectUri;
-
-    private final KakaoService kakaoService;
+public class KakaoAuthController {
+    private final KakaoAuthService kakaoAuthService;
 
     private final MemberService memberService;
 
-    public KakaoController(KakaoService kakaoService, MemberService memberService) {
-        this.kakaoService = kakaoService;
+    public KakaoAuthController(KakaoAuthService kakaoAuthService, MemberService memberService) {
+        this.kakaoAuthService = kakaoAuthService;
         this.memberService = memberService;
     }
 
     @GetMapping("/login")
     public ResponseEntity<Void> authRedirectToKakao() {
-        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize" +
-            "?response_type=code" +
-            "&client_id=" + clientId +
-            "&redirect_uri=" + redirectUri;
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(kakaoAuthUrl));
+        headers.setLocation(kakaoAuthService.getKakaoAuthUri());
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     @GetMapping("/callback")
     public ResponseEntity<MemberLoginResponseDto> authCallback(@RequestParam("code") String code) {
-        String accessToken = kakaoService.requestAccessToken(code);
-        KakaoUserResponseDto userResponseDto = kakaoService.getUserInfo(accessToken);
-
-        return ResponseEntity.ok(memberService.loginWithKakao(userResponseDto));
+        return ResponseEntity.ok(memberService.loginWithKakao(code));
     }
 }

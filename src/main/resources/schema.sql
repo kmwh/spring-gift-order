@@ -24,7 +24,7 @@ CREATE TABLE member (
   name VARCHAR(255),
   email VARCHAR(255),
   password VARCHAR(255),
-  provider VARCHAR(255),
+  provider TINYINT,
   social_id BIGINT
 );
 
@@ -46,3 +46,30 @@ ADD CONSTRAINT fk_wish_member_id
 FOREIGN KEY (member_id)
 REFERENCES member(id)
 ON DELETE CASCADE;
+
+CREATE TABLE kakao_token (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  access_token VARCHAR(255) NOT NULL,
+  refresh_token VARCHAR(255) NOT NULL,
+  access_token_expires_at DATETIME NOT NULL,
+  refresh_token_expires_at DATETIME NOT NULL,
+  member_id BIGINT
+);
+
+ALTER TABLE kakao_token
+ADD CONSTRAINT fk_token_member_id
+FOREIGN KEY (member_id)
+REFERENCES member (id);
+
+CREATE TABLE orders (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  option_id BIGINT,
+  quantity INT NOT NULL,
+  order_date_time TIMESTAMP NOT NULL,
+  message VARCHAR(255)
+);
+
+ALTER TABLE orders
+ADD CONSTRAINT fk_order_option_id
+FOREIGN KEY (option_id)
+REFERENCES option (id);
