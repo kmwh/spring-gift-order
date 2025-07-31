@@ -10,7 +10,7 @@ import gift.global.security.JwtProvider;
 import gift.kakao.dto.KakaoTokenDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
-import gift.kakao.service.KakaoAuthService;
+import gift.kakao.service.KakaoService;
 import gift.member.dto.MemberLoginRequestDto;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.dto.MemberRegisterRequestDto;
@@ -30,13 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
 
-    private final KakaoAuthService kakaoAuthService;
+    private final KakaoService kakaoService;
 
     private final JwtProvider jwtProvider;
 
-    public MemberServiceImpl(MemberRepository memberRepository, KakaoAuthService kakaoAuthService, JwtProvider jwtProvider) {
+    public MemberServiceImpl(MemberRepository memberRepository, KakaoService kakaoService, JwtProvider jwtProvider) {
         this.memberRepository = memberRepository;
-        this.kakaoAuthService = kakaoAuthService;
+        this.kakaoService = kakaoService;
         this.jwtProvider = jwtProvider;
     }
 
@@ -118,9 +118,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     public MemberLoginResponseDto loginWithKakao(String code) {
-        KakaoTokenResponseDto tokenResponseDto = kakaoAuthService.requestAccessToken(code);
+        KakaoTokenResponseDto tokenResponseDto = kakaoService.requestAccessToken(code);
 
-        KakaoUserResponseDto userResponseDto = kakaoAuthService.getUserId(
+        KakaoUserResponseDto userResponseDto = kakaoService.getUserId(
             tokenResponseDto.accessToken());
 
         Long socialId = userResponseDto.id();
@@ -132,7 +132,7 @@ public class MemberServiceImpl implements MemberService {
                 return memberRepository.save(newMember);
             });
 
-        kakaoAuthService.saveToken(KakaoTokenDto.from(
+        kakaoService.saveToken(KakaoTokenDto.from(
             tokenResponseDto.accessToken(),
             tokenResponseDto.refreshToken(),
             tokenResponseDto.expiresIn(),

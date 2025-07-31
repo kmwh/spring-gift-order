@@ -1,12 +1,19 @@
 package gift.kakao.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gift.global.exception.KakaoTokenNotFoundException;
 import gift.kakao.dto.KakaoTokenDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
+import gift.kakao.dto.OrderResponseDto;
 import gift.kakao.entity.KakaoToken;
 import gift.kakao.repository.KakaoTokenRepository;
+import gift.kakao.template.TemplateObject;
 import java.net.URI;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,7 +22,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class KakaoAuthServiceImpl implements KakaoAuthService {
+public class KakaoServiceImpl implements KakaoService {
     private final KakaoTokenRepository kakaoTokenRepository;
 
     private final RestClient restClient;
@@ -26,7 +33,7 @@ public class KakaoAuthServiceImpl implements KakaoAuthService {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    public KakaoAuthServiceImpl(
+    public KakaoServiceImpl(
         KakaoTokenRepository kakaoTokenRepository,
         RestClient restClient
     ) {
@@ -77,5 +84,45 @@ public class KakaoAuthServiceImpl implements KakaoAuthService {
     @Override
     public void saveToken(KakaoTokenDto kakaoTokenDto) {
         kakaoTokenRepository.save(KakaoToken.from(kakaoTokenDto));
+    }
+
+    @Override
+    public void sendKakaoMessage(Long memberId, OrderResponseDto orderResponseDto) {
+        String kakaoAccessToken = getAccessTokenByMemberId(memberId);
+
+        restClient.post()
+            .uri("https://kapi.kakao.com/v2/api/talk/memo/default/send")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + kakaoAccessToken)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(toKakaoTemplateFormDto(orderResponseDto))
+            .retrieve()
+            .toBodilessEntity();
+    }
+
+    @Override
+    public String getAccessTokenByMemberId(Long memberId) {
+        Optional<KakaoToken> kakaoTokenOptional = kakaoTokenRepository.findByMemberId(memberId);
+        KakaoToken kakaoToken = kakaoTokenOptional.orElseThrow(KakaoTokenNotFoundException::new);
+
+        return kakaoToken.getAccessToken();
+    }
+
+    @Override
+    public MultiValueMap<String, String> toKakaoTemplateFormDto(OrderResponseDto dto) {
+        TemplateObject templateObject = TemplateObject.from(dto);
+
+        // JSON 문자열로 직렬화
+        String templateJson;
+        try {
+            templateJson = new ObjectMapper().writeValueAsString(templateObject);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        // form data 생성
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("template_object", templateJson);
+
+        return formData;
     }
 }

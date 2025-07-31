@@ -7,7 +7,7 @@ import gift.kakao.entity.KakaoToken;
 import gift.kakao.entity.Order;
 import gift.kakao.repository.KakaoTokenRepository;
 import gift.kakao.repository.OrderRepository;
-import gift.kakao.service.KakaoAuthServiceImpl;
+import gift.kakao.service.KakaoServiceImpl;
 import gift.kakao.service.OrderServiceImpl;
 import gift.member.entity.Member;
 import gift.option.entity.Option;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class KakaoAuthServiceTest {
+class KakaoServiceTest {
     @Mock
     private OptionRepository optionRepository;
 
@@ -46,7 +46,7 @@ class KakaoAuthServiceTest {
     private OrderServiceImpl orderService;
 
     @InjectMocks
-    private KakaoAuthServiceImpl kakaoService;
+    private KakaoServiceImpl kakaoService;
 
     @Mock
     private RestClient restClient;
@@ -64,7 +64,7 @@ class KakaoAuthServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        kakaoService = new KakaoAuthServiceImpl(
+        kakaoService = new KakaoServiceImpl(
             kakaoTokenRepository,
             restClient
         );
@@ -72,8 +72,7 @@ class KakaoAuthServiceTest {
         orderService = new OrderServiceImpl(
             optionRepository,
             orderRepository,
-            kakaoTokenRepository,
-            restClient
+            kakaoService
         );
     }
 

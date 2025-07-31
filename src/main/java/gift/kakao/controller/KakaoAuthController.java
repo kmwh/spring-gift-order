@@ -1,8 +1,6 @@
 package gift.kakao.controller;
 
-import gift.kakao.dto.KakaoTokenResponseDto;
-import gift.kakao.dto.KakaoUserResponseDto;
-import gift.kakao.service.KakaoAuthService;
+import gift.kakao.service.KakaoService;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.service.MemberService;
 import org.springframework.http.HttpHeaders;
@@ -16,19 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth/kakao")
 public class KakaoAuthController {
-    private final KakaoAuthService kakaoAuthService;
+    private final KakaoService kakaoService;
 
     private final MemberService memberService;
 
-    public KakaoAuthController(KakaoAuthService kakaoAuthService, MemberService memberService) {
-        this.kakaoAuthService = kakaoAuthService;
+    public KakaoAuthController(KakaoService kakaoService, MemberService memberService) {
+        this.kakaoService = kakaoService;
         this.memberService = memberService;
     }
 
     @GetMapping("/login")
     public ResponseEntity<Void> authRedirectToKakao() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(kakaoAuthService.getKakaoAuthUri());
+        headers.setLocation(kakaoService.getKakaoAuthUri());
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
