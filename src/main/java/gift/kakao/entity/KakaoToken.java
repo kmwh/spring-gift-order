@@ -1,6 +1,6 @@
 package gift.kakao.entity;
 
-import gift.kakao.dto.KakaoTokenRequestDto;
+import gift.kakao.dto.KakaoTokenDto;
 import gift.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,7 +59,7 @@ public class KakaoToken {
         return LocalDateTime.now().isAfter(this.refreshTokenExpiresIn);
     }
 
-    public static KakaoToken from(KakaoTokenRequestDto requestDto) {
+    public static KakaoToken from(KakaoTokenDto requestDto) {
         return new KakaoToken(
             requestDto.accessToken(),
             requestDto.refreshToken(),

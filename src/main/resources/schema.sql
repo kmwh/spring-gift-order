@@ -24,7 +24,7 @@ CREATE TABLE member (
   name VARCHAR(255),
   email VARCHAR(255),
   password VARCHAR(255),
-  provider VARCHAR(255),
+  provider TINYINT,
   social_id BIGINT
 );
 

@@ -5,4 +5,5 @@ public record Link(
     String mobile_web_url,
     String android_execution_params,
     String ios_execution_params
-) {}
+) {
+}

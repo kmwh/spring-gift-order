@@ -28,7 +28,7 @@ public class Member {
     private Password password;
 
     @Column(name = "provider")
-    private String provider;
+    private SocialType provider;
 
     @Column(name = "social_id")
     private Long socialId;
@@ -46,7 +46,7 @@ public class Member {
         this.password = password;
     }
 
-    public Member(Long id, Name name, Email email, Password password, String provider, Long socialId) {
+    public Member(Long id, Name name, Email email, Password password, SocialType provider, Long socialId) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -77,7 +77,7 @@ public class Member {
             null,
             null,
             null,
-            "kakao",
+            SocialType.KAKAO,
             socialId
         );
     }

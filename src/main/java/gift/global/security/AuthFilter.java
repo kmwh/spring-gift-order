@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,8 +20,10 @@ public class AuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        List<String> excludedPrefixes = List.of("/api/wishes", "/api/orders");
+
         String path = request.getRequestURI();
-        return !path.startsWith("/api/wishes") && !path.startsWith("/api/orders");
+        return excludedPrefixes.stream().noneMatch(path::startsWith);
     }
 
     @Override

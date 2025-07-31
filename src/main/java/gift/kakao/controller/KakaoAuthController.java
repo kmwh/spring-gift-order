@@ -1,10 +1,9 @@
 package gift.kakao.controller;
 
-import gift.kakao.dto.KakaoLoginResponseDto;
-import gift.kakao.dto.KakaoTokenRequestDto;
 import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
-import gift.kakao.service.KakaoService;
+import gift.kakao.service.KakaoAuthService;
+import gift.member.dto.MemberLoginResponseDto;
 import gift.member.service.MemberService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,39 +16,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth/kakao")
 public class KakaoAuthController {
-    private final KakaoService kakaoService;
+    private final KakaoAuthService kakaoAuthService;
 
     private final MemberService memberService;
 
-    public KakaoAuthController(KakaoService kakaoService, MemberService memberService) {
-        this.kakaoService = kakaoService;
+    public KakaoAuthController(KakaoAuthService kakaoAuthService, MemberService memberService) {
+        this.kakaoAuthService = kakaoAuthService;
         this.memberService = memberService;
     }
 
     @GetMapping("/login")
     public ResponseEntity<Void> authRedirectToKakao() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(kakaoService.getKakaoAuthUri());
+        headers.setLocation(kakaoAuthService.getKakaoAuthUri());
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<KakaoLoginResponseDto> authCallback(@RequestParam("code") String code) {
-        KakaoTokenResponseDto accessToken = kakaoService.requestAccessToken(code);
-
-        KakaoUserResponseDto userResponseDto = kakaoService.getUserInfo(accessToken.accessToken());
-
-        KakaoLoginResponseDto loginResponseDto = memberService.loginWithKakao(userResponseDto);
-
-        kakaoService.saveToken(KakaoTokenRequestDto.from(
-            accessToken.accessToken(),
-            accessToken.refreshToken(),
-            accessToken.expiresIn(),
-            accessToken.refreshTokenExpiresIn(),
-            loginResponseDto.member()
-        ));
-
-        return ResponseEntity.ok(loginResponseDto);
+    public ResponseEntity<MemberLoginResponseDto> authCallback(@RequestParam("code") String code) {
+        return ResponseEntity.ok(memberService.loginWithKakao(code));
     }
 }

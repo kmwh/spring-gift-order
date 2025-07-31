@@ -2,21 +2,21 @@ package gift.kakao.dto;
 
 import gift.member.entity.Member;
 
-public record KakaoTokenRequestDto(
+public record KakaoTokenDto(
     String accessToken,
     String refreshToken,
     int expiresIn,
     int refreshTokenExpiresIn,
     Member member
 ) {
-    public static KakaoTokenRequestDto from(
+    public static KakaoTokenDto from(
         String accessToken,
         String refreshToken,
         int expiresIn,
         int refreshTokenExpiresIn,
         Member member
     ) {
-        return new KakaoTokenRequestDto(
+        return new KakaoTokenDto(
             accessToken,
             refreshToken,
             expiresIn,

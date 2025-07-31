@@ -7,7 +7,8 @@ import gift.kakao.entity.KakaoToken;
 import gift.kakao.entity.Order;
 import gift.kakao.repository.KakaoTokenRepository;
 import gift.kakao.repository.OrderRepository;
-import gift.kakao.service.KakaoServiceImpl;
+import gift.kakao.service.KakaoAuthServiceImpl;
+import gift.kakao.service.OrderServiceImpl;
 import gift.member.entity.Member;
 import gift.option.entity.Option;
 import gift.option.repository.OptionRepository;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class KakaoServiceTest {
+class KakaoAuthServiceTest {
     @Mock
     private OptionRepository optionRepository;
 
@@ -36,7 +37,16 @@ class KakaoServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
+    private KakaoTokenRepository kakaoTokenRepository;
+
+    @Mock
     private OptionService optionService;
+
+    @InjectMocks
+    private OrderServiceImpl orderService;
+
+    @InjectMocks
+    private KakaoAuthServiceImpl kakaoService;
 
     @Mock
     private RestClient restClient;
@@ -50,21 +60,19 @@ class KakaoServiceTest {
     @Mock
     private RestClient.ResponseSpec responseSpec;
 
-    @Mock
-    private KakaoTokenRepository kakaoTokenRepository;
-
-    @InjectMocks
-    private KakaoServiceImpl kakaoService;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        kakaoService = new KakaoServiceImpl(
+        kakaoService = new KakaoAuthServiceImpl(
             kakaoTokenRepository,
+            restClient
+        );
+
+        orderService = new OrderServiceImpl(
             optionRepository,
             orderRepository,
-            optionService,
+            kakaoTokenRepository,
             restClient
         );
     }
@@ -132,7 +140,6 @@ class KakaoServiceTest {
         when(optionRepository.findById(optionId)).thenReturn(Optional.of(option));
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(kakaoTokenRepository.findByMemberId(memberId)).thenReturn(Optional.of(token));
-        doNothing().when(optionService).subtract(optionId, quantity);
 
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
@@ -143,13 +150,12 @@ class KakaoServiceTest {
         when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
 
         // when
-        OrderResponseDto result = kakaoService.order(memberId, requestDto);
+        OrderResponseDto result = orderService.order(memberId, requestDto);
 
         // then
         assertNotNull(result);
         verify(optionRepository).findById(optionId);
         verify(orderRepository).save(any(Order.class));
-        verify(optionService).subtract(optionId, quantity);
         verify(restClient).post();
     }
 }

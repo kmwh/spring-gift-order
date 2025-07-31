@@ -79,13 +79,4 @@ public class OptionServiceImpl implements OptionService{
 
         optionRepository.deleteById(optionId);
     }
-
-    @Transactional
-    @Override
-    public void subtract(Long optionId, Integer num) {
-        Optional<Option> optionOptional = optionRepository.findById(optionId);
-        Option option = optionOptional.orElseThrow(OptionNotFoundException::new);
-
-        option.updateQuantity(option.getQuantity() - num);
-    }
 }

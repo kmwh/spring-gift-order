@@ -7,13 +7,16 @@ import gift.global.exception.MemberEmailAlreadyExistsException;
 import gift.global.exception.MemberEmailNotFoundException;
 import gift.global.exception.MemberNotFoundException;
 import gift.global.security.JwtProvider;
-import gift.kakao.dto.KakaoLoginResponseDto;
+import gift.kakao.dto.KakaoTokenDto;
+import gift.kakao.dto.KakaoTokenResponseDto;
 import gift.kakao.dto.KakaoUserResponseDto;
+import gift.kakao.service.KakaoAuthService;
 import gift.member.dto.MemberLoginRequestDto;
 import gift.member.dto.MemberLoginResponseDto;
 import gift.member.dto.MemberRegisterRequestDto;
 import gift.member.dto.MemberResponseDto;
 import gift.member.entity.Member;
+import gift.member.entity.SocialType;
 import gift.member.repository.MemberRepository;
 import gift.member.vo.Email;
 import gift.member.vo.Name;
@@ -26,10 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+
+    private final KakaoAuthService kakaoAuthService;
+
     private final JwtProvider jwtProvider;
 
-    public MemberServiceImpl(MemberRepository memberRepository, JwtProvider jwtProvider) {
+    public MemberServiceImpl(MemberRepository memberRepository, KakaoAuthService kakaoAuthService, JwtProvider jwtProvider) {
         this.memberRepository = memberRepository;
+        this.kakaoAuthService = kakaoAuthService;
         this.jwtProvider = jwtProvider;
     }
 
@@ -110,16 +117,29 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Transactional
-    public KakaoLoginResponseDto loginWithKakao(KakaoUserResponseDto userResponseDto) {
+    public MemberLoginResponseDto loginWithKakao(String code) {
+        KakaoTokenResponseDto tokenResponseDto = kakaoAuthService.requestAccessToken(code);
+
+        KakaoUserResponseDto userResponseDto = kakaoAuthService.getUserId(
+            tokenResponseDto.accessToken());
+
         Long socialId = userResponseDto.id();
 
         Member member = memberRepository
-            .findByProviderAndSocialId("kakao", socialId)
+            .findByProviderAndSocialId(SocialType.KAKAO, socialId)
             .orElseGet(() -> {
                 Member newMember = Member.createFromKakao(socialId);
                 return memberRepository.save(newMember);
             });
 
-        return KakaoLoginResponseDto.from(jwtProvider.createToken(member), member);
+        kakaoAuthService.saveToken(KakaoTokenDto.from(
+            tokenResponseDto.accessToken(),
+            tokenResponseDto.refreshToken(),
+            tokenResponseDto.expiresIn(),
+            tokenResponseDto.refreshTokenExpiresIn(),
+            member
+        ));
+
+        return MemberLoginResponseDto.from(jwtProvider.createToken(member));
     }
 }
