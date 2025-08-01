@@ -39,15 +39,13 @@ public class Member {
         this.id = id;
     }
 
-    public Member(Long id, Name name, Email email, Password password) {
-        this.id = id;
+    public Member(Name name, Email email, Password password) {
         this.name = name;
         this.email = email;
         this.password = password;
     }
 
-    public Member(Long id, Name name, Email email, Password password, SocialType provider, Long socialId) {
-        this.id = id;
+    public Member(Name name, Email email, Password password, SocialType provider, Long socialId) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -73,10 +71,9 @@ public class Member {
 
     public static Member createFromKakao(Long socialId) {
         return new Member(
-            null,
-            null,
-            null,
-            null,
+            new Name("", true),
+            new Email("", true),
+            new Password("", true),
             SocialType.KAKAO,
             socialId
         );

@@ -5,13 +5,17 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Name {
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     public Name() {}
 
     public Name(String value) {
         check(value);
+        this.name = value;
+    }
+
+    public Name(String value, boolean isKakao) {
         this.name = value;
     }
 

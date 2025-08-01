@@ -48,7 +48,6 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Member member = new Member(
-            null,
             new Name(requestDto.name()),
             new Email(requestDto.email()),
             new Password(requestDto.password())
@@ -98,7 +97,6 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Member member = new Member(
-            id,
             new Name(requestDto.name()),
             new Email(requestDto.email()),
             new Password(requestDto.password())

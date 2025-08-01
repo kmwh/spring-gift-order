@@ -25,19 +25,19 @@ public class MemberAdminController {
     @GetMapping
     public String list(Model model) {
         model.addAttribute("members", memberService.findAll());
-        return "/members/list";
+        return "members/list";
     }
 
     @GetMapping("/new")
     public String createForm(Model model) {
         model.addAttribute("member", MemberRegisterRequestDto.from());
-        return "/members/create_form";
+        return "members/create_form";
     }
 
     @GetMapping("/{id}/edit")
     public String updateForm(@PathVariable Long id, Model model) {
         model.addAttribute("member", memberService.findById(id));
-        return "/members/update_form";
+        return "members/update_form";
     }
 
     @PostMapping

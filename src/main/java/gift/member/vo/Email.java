@@ -5,13 +5,17 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Email {
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     protected Email() {}
 
     public Email(String value) {
         check(value);
+        this.email = value;
+    }
+
+    public Email(String value, boolean isKakao) {
         this.email = value;
     }
 
