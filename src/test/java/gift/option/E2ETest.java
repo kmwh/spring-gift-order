@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,19 +27,21 @@ public class E2ETest {
     @LocalServerPort
     private int port;
 
+    private String baseUrl = "";
+
+    @Autowired
     RestClient restClient;
 
     @BeforeEach
     void setUp() {
-        restClient = RestClient.builder()
-            .baseUrl("http://localhost:" + port + "/api/products/1/options")
-            .build();
+        baseUrl = "http://localhost:" + port + "/api/products/1/options";
     }
 
     @Test
     void 옵션_목록_조회_성공_테스트() {
         // when
         var response = restClient.get()
+            .uri(baseUrl)
             .retrieve()
             .toEntity(new ParameterizedTypeReference<List<OptionResponseDto>>() {
             });
@@ -52,7 +55,7 @@ public class E2ETest {
     void 단일_옵션_조회_성공_테스트() {
         // when
         var response = restClient.get()
-            .uri("/1")
+            .uri(baseUrl + "/1")
             .retrieve()
             .toEntity(OptionResponseDto.class);
 
@@ -66,7 +69,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.get()
-                .uri("/99")
+                .uri(baseUrl + "/99")
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
 
@@ -81,6 +84,7 @@ public class E2ETest {
 
         // when
         var response = restClient.post()
+            .uri(baseUrl)
             .body(requestDto)
             .retrieve()
             .toEntity(OptionResponseDto.class);
@@ -98,6 +102,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.post()
+                .uri(baseUrl)
                 .body(requestDto)
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
@@ -114,6 +119,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.post()
+                .uri(baseUrl)
                 .body(requestDto)
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
@@ -130,6 +136,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.post()
+                .uri(baseUrl)
                 .body(requestDto)
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
@@ -146,6 +153,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.post()
+                .uri(baseUrl)
                 .body(requestDto)
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
@@ -161,7 +169,7 @@ public class E2ETest {
 
         // when
         var response = restClient.put()
-            .uri("/1")
+            .uri(baseUrl + "/1")
             .body(requestDto)
             .retrieve()
             .toEntity(OptionResponseDto.class);
@@ -179,7 +187,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.put()
-                .uri("/99")
+                .uri(baseUrl + "/99")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(OptionResponseDto.class));
@@ -192,7 +200,7 @@ public class E2ETest {
     void 옵션_삭제_성공_테스트() {
         // when
         var response = restClient.delete()
-            .uri("/2")
+            .uri(baseUrl + "/2")
             .retrieve()
             .toEntity(Void.class);
 
@@ -205,7 +213,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.delete()
-                .uri("/99")
+                .uri(baseUrl + "/99")
                 .retrieve()
                 .toEntity(Void.class));
 
@@ -217,7 +225,7 @@ public class E2ETest {
     void 옵션_전부_삭제_테스트() {
         // when
         var response = restClient.delete()
-            .uri("/1")
+            .uri(baseUrl + "/1")
             .retrieve()
             .toEntity(Void.class);
 
@@ -227,7 +235,7 @@ public class E2ETest {
         // when
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.delete()
-                .uri("/2")
+                .uri(baseUrl + "/2")
                 .retrieve()
                 .toEntity(Void.class));
 

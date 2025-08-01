@@ -39,9 +39,6 @@ class KakaoServiceTest {
     @Mock
     private KakaoTokenRepository kakaoTokenRepository;
 
-    @Mock
-    private OptionService optionService;
-
     @InjectMocks
     private OrderServiceImpl orderService;
 

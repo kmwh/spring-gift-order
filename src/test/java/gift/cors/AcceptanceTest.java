@@ -2,36 +2,52 @@ package gift.cors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.*;
+import org.springframework.web.client.RestClient;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AcceptanceTest {
-    @Autowired
-    private MockMvc mockMvc;
 
-    private static final String ALLOWED_METHODS = "GET,POST,PUT,DELETE";
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    RestClient restClient;
 
     @Test
-    void cors() throws Exception {
-        mockMvc.perform(
-                options("/api/products")
-                    .header(HttpHeaders.ORIGIN, "http://localhost:8080")
-                    .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-            )
-            .andExpect(status().isOk())
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*"))
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS))
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION))
-            .andDo(print())
-        ;
+    void cors() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setOrigin("http://localhost:8080");
+        headers.setAccessControlRequestMethod(HttpMethod.GET);
+
+        ResponseEntity<Void> response = restClient
+            .method(HttpMethod.OPTIONS)
+            .uri("http://localhost:" + port + "/api/products")
+            .headers(httpHeaders -> {
+                httpHeaders.addAll(headers);
+            })
+            .retrieve()
+            .toBodilessEntity();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders()
+            .getAccessControlAllowOrigin())
+            .isEqualTo("*");
+        assertThat(response.getHeaders()
+            .getAccessControlAllowMethods())
+            .containsExactlyInAnyOrder(
+                HttpMethod.GET,
+                HttpMethod.POST,
+                HttpMethod.PUT,
+                HttpMethod.DELETE
+            );
+        assertThat(response
+            .getHeaders()
+            .getAccessControlExposeHeaders())
+            .contains(HttpHeaders.LOCATION);
     }
 }
