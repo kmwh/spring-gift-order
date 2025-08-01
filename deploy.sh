@@ -1,7 +1,11 @@
 #!/bin/bash
 
-BUILD_DIR=/home/ubuntu/build
-DEPLOY_DIR=/home/ubuntu
+export JWT_SECRET=
+export KAKAO_CLIENT_ID=
+export KAKAO_REDIRECT_URI=
+
+BUILD_DIR=/home/azureuser/build
+DEPLOY_DIR=/home/azureuser
 LOG_FILE=$DEPLOY_DIR/app.log
 
 echo "> Build 파일 복사"
@@ -23,5 +27,3 @@ fi
 
 echo "> 새 애플리케이션 실행: $JAR_NAME"
 nohup java -jar $DEPLOY_DIR/$JAR_NAME > $LOG_FILE 2>&1 &
-
-echo "> 배포 완료"
