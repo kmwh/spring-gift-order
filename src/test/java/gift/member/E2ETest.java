@@ -25,6 +25,9 @@ public class E2ETest {
     @LocalServerPort
     private int port;
 
+    private String baseUrl = "";
+
+    @Autowired
     RestClient restClient;
 
     @Autowired
@@ -32,9 +35,7 @@ public class E2ETest {
 
     @BeforeEach
     void setUp() {
-        restClient = RestClient.builder()
-            .baseUrl("http://localhost:" + port + "/api/members")
-            .build();
+        baseUrl = "http://localhost:" + port + "/api/members";
     }
 
     @Test
@@ -48,7 +49,7 @@ public class E2ETest {
 
         // when
         ResponseEntity<Void> response = restClient.post()
-            .uri("/register")
+            .uri(baseUrl + "/register")
             .body(requestDto)
             .retrieve()
             .toEntity(Void.class);
@@ -67,7 +68,7 @@ public class E2ETest {
 
         // when
         ResponseEntity<MemberLoginResponseDto> response = restClient.post()
-            .uri("/login")
+            .uri(baseUrl + "/login")
             .body(requestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -96,7 +97,7 @@ public class E2ETest {
         // when
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restClient.post()
-                .uri("/register")
+                .uri(baseUrl + "/register")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(Void.class);
@@ -118,7 +119,7 @@ public class E2ETest {
         // when
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restClient.post()
-                .uri("/register")
+                .uri(baseUrl + "/register")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(Void.class);
@@ -140,7 +141,7 @@ public class E2ETest {
         // when
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restClient.post()
-                .uri("/register")
+                .uri(baseUrl + "/register")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(Void.class);
@@ -161,7 +162,7 @@ public class E2ETest {
         // when
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restClient.post()
-                .uri("/login")
+                .uri(baseUrl + "/login")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(MemberLoginResponseDto.class);
@@ -183,7 +184,7 @@ public class E2ETest {
         // when & then
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restClient.post()
-                .uri("/login")
+                .uri(baseUrl + "/login")
                 .body(requestDto)
                 .retrieve()
                 .toEntity(MemberLoginResponseDto.class);

@@ -28,6 +28,9 @@ public class E2ETest {
     @LocalServerPort
     private int port;
 
+    private String baseUrl = "";
+
+    @Autowired
     RestClient restClient;
 
     @Autowired
@@ -35,9 +38,7 @@ public class E2ETest {
 
     @BeforeEach
     void setUp() {
-        restClient = RestClient.builder()
-            .baseUrl("http://localhost:" + port + "/api")
-            .build();
+        baseUrl = "http://localhost:" + port + "/api";
     }
 
     @Test
@@ -50,7 +51,7 @@ public class E2ETest {
 
         // when (로그인)
         ResponseEntity<MemberLoginResponseDto> loginResponse = restClient.post()
-            .uri("/members/login")
+            .uri(baseUrl + "/members/login")
             .body(loginRequestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -67,7 +68,7 @@ public class E2ETest {
 
         // when (위시 리스트)
         ResponseEntity<Void> response = restClient.post()
-            .uri("/wishes")
+            .uri(baseUrl + "/wishes")
             .header("Authorization", "Bearer " + loginToken)
             .body(requestDto)
             .retrieve()
@@ -87,7 +88,7 @@ public class E2ETest {
 
         // when (로그인)
         ResponseEntity<MemberLoginResponseDto> loginResponse = restClient.post()
-            .uri("/members/login")
+            .uri(baseUrl + "/members/login")
             .body(loginRequestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -101,7 +102,7 @@ public class E2ETest {
 
         // when (위시 리스트)
         ResponseEntity<PageResponseDto<WishResponseDto>> response = restClient.get()
-            .uri("/wishes?page=0&size=1")
+            .uri(baseUrl + "/wishes?page=0&size=1")
             .header("Authorization", "Bearer " + loginToken)
             .retrieve()
             .toEntity(new ParameterizedTypeReference<PageResponseDto<WishResponseDto>>() {
@@ -114,7 +115,7 @@ public class E2ETest {
 
         // when (위시 리스트)
         response = restClient.get()
-            .uri("/wishes?page=1&size=1")
+            .uri(baseUrl + "/wishes?page=1&size=1")
             .header("Authorization", "Bearer " + loginToken)
             .retrieve()
             .toEntity(new ParameterizedTypeReference<PageResponseDto<WishResponseDto>>() {
@@ -136,7 +137,7 @@ public class E2ETest {
 
         // when (로그인)
         ResponseEntity<MemberLoginResponseDto> loginResponse = restClient.post()
-            .uri("/members/login")
+            .uri(baseUrl + "/members/login")
             .body(loginRequestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -153,7 +154,7 @@ public class E2ETest {
 
         // when (위시 리스트)
         ResponseEntity<Void> response = restClient.put()
-            .uri("/wishes/1")
+            .uri(baseUrl + "/wishes/1")
             .header("Authorization", "Bearer " + loginToken)
             .body(requestDto)
             .retrieve()
@@ -173,7 +174,7 @@ public class E2ETest {
 
         // when (로그인)
         ResponseEntity<MemberLoginResponseDto> loginResponse = restClient.post()
-            .uri("/members/login")
+            .uri(baseUrl + "/members/login")
             .body(loginRequestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -191,7 +192,7 @@ public class E2ETest {
         // when (위시 리스트)
         var exception = assertThrows(HttpClientErrorException.class, () ->
             restClient.put()
-                .uri("/wishes/1")
+                .uri(baseUrl + "/wishes/1")
                 .header("Authorization", "Bearer " + loginToken)
                 .body(requestDto)
                 .retrieve()
@@ -211,7 +212,7 @@ public class E2ETest {
 
         // when (로그인)
         ResponseEntity<MemberLoginResponseDto> loginResponse = restClient.post()
-            .uri("/members/login")
+            .uri(baseUrl + "/members/login")
             .body(loginRequestDto)
             .retrieve()
             .toEntity(MemberLoginResponseDto.class);
@@ -225,7 +226,7 @@ public class E2ETest {
 
         // when (위시 리스트)
         ResponseEntity<Void> response = restClient.delete()
-            .uri("/wishes/1")
+            .uri(baseUrl + "/wishes/1")
             .header("Authorization", "Bearer " + loginToken)
             .retrieve()
             .toEntity(Void.class);
